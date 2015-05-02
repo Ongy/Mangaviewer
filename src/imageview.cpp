@@ -6,6 +6,7 @@
 
 ImageView::ImageView(QWidget * parent, Qt::WindowFlags f)
     : QLabel(parent, f)
+    , image(NULL)
 {
 
 }

@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include <QString>
 
-#include "imageprovider.h"
+#include "providercollection.h"
+#include "mangaviewer/plugins.h"
 
 namespace Ui {
 class MangaViewer;
@@ -14,8 +15,10 @@ class MangaViewer : public QMainWindow
 {
     Q_OBJECT
     Ui::MangaViewer *ui;
+    ProviderCollection collection;
     ImageProvider * provider;
     QPixmap * image;
+    QString defaultProvider;
 
     int hscroll;
     int vscroll;
@@ -33,7 +36,7 @@ private:
     void postFileLoad();
     void loadNextFile();
     void loadPrevFile();
-    void loadManga(QString & manga);
+    void loadManga();
 };
 
 #endif // MANGAVIEWER_H

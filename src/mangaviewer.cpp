@@ -7,17 +7,17 @@
 #include <QSettings>
 #include <QScrollBar>
 #include <QPropertyAnimation>
+#include <QInputDialog>
 
 #include "mangaviewer.h"
 #include "ui_mangaviewer.h"
-#include "imageprovider.h"
 
 #include "config.h"
 
 MangaViewer::MangaViewer(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MangaViewer),
-    provider(new ImageProvider(this)),
+    provider(NULL),
     image(new QPixmap())
 {
     ui->setupUi(this);
@@ -35,6 +35,11 @@ MangaViewer::MangaViewer(QWidget *parent) :
         settings.setValue("vscroll", this->vscroll);
     }
     settings.endGroup();
+    this->defaultProvider = settings.value("provider/default", "").toString();
+    if(this->defaultProvider == "") {
+        this->defaultProvider = DEFAULT_PROVIDER;
+        settings.setValue("provider/default", this->defaultProvider);
+    }
 }
 
 MangaViewer::~MangaViewer()
@@ -47,8 +52,24 @@ void MangaViewer::resizeEvent(QResizeEvent * event)
     ui->label->setSize(event->size());
 }
 
-void MangaViewer::loadManga(QString & manga)
+void MangaViewer::loadManga()
 {
+    if(!this->provider)
+        this->provider = this->collection.getPlugin(this->defaultProvider);
+
+    if(!this->provider) {
+        qDebug("Could not load default provider");
+        return;
+    }
+
+    QString manga;
+    QStringList list = this->provider->getMangas();
+    if(list.empty()) {
+        manga = this->provider->displayChooser();
+    } else {
+        manga = "";
+    }
+
     if(provider->loadManga(manga) < 0) {
         return;
     }
@@ -93,7 +114,7 @@ void MangaViewer::keyPressEvent(QKeyEvent * event)
     QPropertyAnimation * anim = NULL;
     switch(event->key()) {
     case Qt::Key_Left:
-        if(ui->label->width() == this->width() || event->modifiers() & Qt::ShiftModifier) {
+        if(ui->label->width() <= this->width() || event->modifiers() & Qt::ShiftModifier) {
             loadPrevFile();
         }
         else {
@@ -102,7 +123,7 @@ void MangaViewer::keyPressEvent(QKeyEvent * event)
         }
         break;
     case Qt::Key_Right:
-        if(ui->label->width() == this->width() || event->modifiers() & Qt::ShiftModifier) {
+        if(ui->label->width() <= this->width() || event->modifiers() & Qt::ShiftModifier) {
             loadNextFile();
         }
         else{
@@ -125,11 +146,14 @@ void MangaViewer::keyPressEvent(QKeyEvent * event)
         this->showNormal();
         break;
     case Qt::Key_O:
-        if(event->modifiers() & Qt::ControlModifier){
-            QString home = QDir::homePath();
-            QString manga = QFileDialog::getExistingDirectory(this, "Choose which manga to view", home);
-            this->loadManga(manga);
+        if(event->modifiers() & Qt::ControlModifier) {
+            QString plugin = QInputDialog::getItem(this, "Choose image provider", "Providers:",
+                                                   this->collection.getPluginList(), 0, false);
+            if(plugin == "")
+                return;
+            this->provider = this->collection.getPlugin(plugin);
         }
+        this->loadManga();
         break;
     case Qt::Key_Q:
         QApplication::quit();

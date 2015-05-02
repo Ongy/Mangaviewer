@@ -16,12 +16,13 @@ INCLUDEPATH += include
 SOURCES += src/main.cpp\
         src/mangaviewer.cpp \
     src/imageview.cpp \
-    src/imageprovider.cpp
+    src/providercollection.cpp
 
 HEADERS  += include/mangaviewer.h \
     include/imageview.h \
-    include/imageprovider.h \
-    include/config.h
+    include/config.h \
+    include/mangaviewer/plugins.h \
+    include/providercollection.h
 
 FORMS    += resources/mangaviewer.ui
 
