@@ -5,12 +5,14 @@
 
 #include <stdio.h>
 #include "imageprovider.h"
+#include "config.h"
 
 
 ImageProvider::ImageProvider(QObject *parent)
     : QObject(parent)
     , chapter(1), panel(0)
     , manga("")
+    , path("")
 {
 
 }
@@ -18,10 +20,11 @@ ImageProvider::ImageProvider(QObject *parent)
 int ImageProvider::loadManga(const QString name)
 {
     bool ok;
-    this->manga = name;
-    QFile info(this->manga + "/.info");
+    this->path = name;
+    QFile info(this->path + "/.info");
     if(info.open(QIODevice::ReadOnly)) {
         QTextStream in(&info);
+        this->manga = in.readLine();
         while(!in.atEnd()) {
             QString line = in.readLine();
             this->chapters.append(line.toInt(&ok));
@@ -35,12 +38,10 @@ int ImageProvider::loadManga(const QString name)
         qDebug("Could not find info file");
         return -1;
     }
-    QSettings settings(NULL);
-    settings.beginGroup("provider/file");
+    QSettings settings(APPNAME, "fileprovider");
     settings.beginGroup(this->manga);
     this->chapter = settings.value("chapter", 1).toInt();
     this->panel = settings.value("panel", 0).toInt();
-    settings.endGroup();
     settings.endGroup();
     return 0;
 }
@@ -48,7 +49,7 @@ int ImageProvider::loadManga(const QString name)
 QString ImageProvider::getPath()
 {
     char buffer[128];
-    QString path = this->manga;
+    QString path = this->path;
     snprintf(buffer, sizeof(buffer), "/%d/%d.jpg", this->chapter, this->panel);
     path.append(buffer);
     return path;
@@ -96,11 +97,9 @@ int ImageProvider::backOff()
 ImageProvider::~ImageProvider()
 {
     this->backOff();
-    QSettings settings(NULL);
-    settings.beginGroup("provider/file");
+    QSettings settings(APPNAME, "fileprovider");
     settings.beginGroup(this->manga);
     settings.setValue("chapter", this->chapter);
     settings.setValue("panel", this->panel);
-    settings.endGroup();
     settings.endGroup();
 }

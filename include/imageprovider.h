@@ -15,6 +15,7 @@ protected:
     int chapter;
     int panel;
     QString manga;
+    QString path;
 public:
     ImageProvider(QObject *parent = 0);
     int loadManga(const QString name);

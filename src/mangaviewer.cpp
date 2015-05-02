@@ -20,10 +20,18 @@ MangaViewer::MangaViewer(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QSettings settings(NULL);
+    QSettings settings(APPNAME, "mangaviewer");
     settings.beginGroup("viewer");
-    this->hscroll = settings.value("hscroll", HSCROLL).toInt();
-    this->vscroll = settings.value("vscroll", VSCROLL).toInt();
+    this->hscroll = settings.value("hscroll", -1).toInt();
+    if(this->hscroll == -1) {
+        this->hscroll = HSCROLL;
+        settings.setValue("hscroll", this->hscroll);
+    }
+    this->vscroll = settings.value("vscroll", -1).toInt();
+    if(this->vscroll == -1) {
+        this->vscroll = VSCROLL;
+        settings.setValue("vscroll", this->vscroll);
+    }
     settings.endGroup();
 }
 

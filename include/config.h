@@ -13,6 +13,7 @@
 #define FULLSCREEN 0
 #endif // FULLSCREEN
 
+#define APPNAME "mangaviewer"
 
 #endif // CONFIG_H
 
