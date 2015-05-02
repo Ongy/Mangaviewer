@@ -11,17 +11,18 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = mangaviewer
 TEMPLATE = app
 
+INCLUDEPATH += include
 
-SOURCES += main.cpp\
-        mangaviewer.cpp \
-    imageview.cpp \
-    imageprovider.cpp
+SOURCES += src/main.cpp\
+        src/mangaviewer.cpp \
+    src/imageview.cpp \
+    src/imageprovider.cpp
 
-HEADERS  += mangaviewer.h \
-    imageview.h \
-    imageprovider.h \
-    config.h
+HEADERS  += include/mangaviewer.h \
+    include/imageview.h \
+    include/imageprovider.h \
+    include/config.h
 
-FORMS    += mangaviewer.ui
+FORMS    += resources/mangaviewer.ui
 
 RESOURCES +=
