@@ -26,9 +26,11 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent * event);
+    void resizeEvent(QResizeEvent * event);
 
 private:
 
+    void postFileLoad();
     void loadNextFile();
     void loadPrevFile();
     void loadManga(QString & manga);

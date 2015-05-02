@@ -5,8 +5,7 @@
 #include "imageview.h"
 
 ImageView::ImageView(QWidget * parent, Qt::WindowFlags f)
-    : QLabel(parent, f),
-      Xoffset(0), Yoffset(0)
+    : QLabel(parent, f)
 {
 
 }
@@ -16,59 +15,29 @@ void ImageView::paintEvent(QPaintEvent * event)
 {
     if(this->image) {
         QPainter painter(this);
-        QRect rect = this->rect();
-        rect.translate(Xoffset, Yoffset);
-        painter.drawPixmap(this->rect(), this->scaledImage, rect);
+        painter.drawPixmap(this->rect(), this->scaledImage, this->rect());
     }
-    event->ignore();
+    event->accept();
 }
 
-void ImageView::resizeEvent(QResizeEvent * event)
+void ImageView::setSize(const QSize &size)
 {
-    this->setScaled(event->size());
-    this->setXoffset(0);
-    this->setYoffset(0);
-}
-
-void ImageView::setXoffset(int offset)
-{
-    this->Xoffset = offset;
-    if(this->Xoffset < 0)
-        this->Xoffset = 0;
-    if(this->Xoffset + this->width() > this->scaledImage.width())
-        this->Xoffset = this->scaledImage.width() - this->width();
-    this->update();
-}
-
-void ImageView::setYoffset(int offset)
-{
-    this->Yoffset = offset;
-    if(this->Yoffset < 0)
-        this->Yoffset = 0;
-    if(this->Yoffset + this->height() > this->scaledImage.height())
-        this->Yoffset = this->scaledImage.height() - this->height();
-    this->update();
+    this->preferedSize = size;
+    this->setScaled();
 }
 
 void ImageView::setImage(QPixmap *image)
 {
     this->image = image;
-    this->setScaled(this->size());
-    this->setXoffset(0);
-    this->setYoffset(0);
+    this->setScaled();
 }
 
-void ImageView::setScaled(QSize size)
-{
-    if(this->image)
-        this->scaledImage = this->image->scaled(size,
-                                            Qt::KeepAspectRatioByExpanding,
-                                            Qt::SmoothTransformation);
-}
-
-bool ImageView::isHigh()
+void ImageView::setScaled()
 {
     if(!this->image)
-        return false;
-    return this->scaledImage.width() == this->width();
+        return;
+    this->scaledImage = this->image->scaled(this->preferedSize,
+                                            Qt::KeepAspectRatioByExpanding,
+                                            Qt::SmoothTransformation);
+    this->setFixedSize(this->scaledImage.size());
 }
