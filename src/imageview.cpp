@@ -37,7 +37,7 @@ void ImageView::setScaled()
 {
     if(!this->image)
         return;
-    this->scaledImage = this->image->scaled(this->preferedSize,
+    this->scaledImage = this->image->scaled(this->preferedSize.width()/2, this->preferedSize.height(),
                                             Qt::KeepAspectRatioByExpanding,
                                             Qt::SmoothTransformation);
     this->setFixedSize(this->scaledImage.size());

@@ -95,6 +95,7 @@ void MangaViewer::loadNextFile()
         qDebug("Image was null");
     else
         ui->label->setImage(image);
+    this->postFileLoad();
 }
 
 void MangaViewer::loadPrevFile()
@@ -107,19 +108,53 @@ void MangaViewer::loadPrevFile()
         qDebug("Image was null");
     else
         ui->label->setImage(image);
+    this->postFileLoad();
+}
+
+//TODO move me somewhere useful
+int sign(int x) {
+    return (x > 0) - (x < 0);
+}
+
+void setAnimation(QPropertyAnimation * animation, int value)
+{
+    if(animation->state() == QPropertyAnimation::Running) {
+        int start = animation->startValue().toInt();
+        int end = animation->endValue().toInt();
+        if(sign(end-start) != sign(value)) {
+            int val = animation->targetObject()->property("value").toInt();
+            animation->setStartValue(val);
+            animation->setEndValue(val + value);
+            animation->setDuration(50);
+            animation->stop();
+            animation->start();
+            return;
+        }
+        animation->pause();
+        animation->setEndValue(end + value);
+        animation->setDuration(animation->duration() + 50);
+        animation->resume();
+    }
+    else {
+        int val = animation->targetObject()->property("value").toInt();
+        animation->setStartValue(val);
+        animation->setEndValue(val + value);
+        animation->setDuration(50);
+        animation->start();
+    }
 }
 
 void MangaViewer::keyPressEvent(QKeyEvent * event)
 {
-    QPropertyAnimation * anim = NULL;
+    static QPropertyAnimation horizontal(ui->scrollArea->horizontalScrollBar(), "value"),
+                             vertical  (ui->scrollArea->verticalScrollBar(), "value");
     switch(event->key()) {
     case Qt::Key_Left:
         if(ui->label->width() <= this->width() || event->modifiers() & Qt::ShiftModifier) {
             loadPrevFile();
         }
         else {
-            anim = new QPropertyAnimation(ui->scrollArea->horizontalScrollBar(), "value");
-            anim->setEndValue(ui->scrollArea->horizontalScrollBar()->value() - this->hscroll);
+            setAnimation(&horizontal, -this->hscroll);
         }
         break;
     case Qt::Key_Right:
@@ -127,17 +162,14 @@ void MangaViewer::keyPressEvent(QKeyEvent * event)
             loadNextFile();
         }
         else{
-            anim = new QPropertyAnimation(ui->scrollArea->horizontalScrollBar(), "value");
-            anim->setEndValue(ui->scrollArea->horizontalScrollBar()->value() + this->hscroll);
+            setAnimation(&horizontal, +this->hscroll);
         }
         break;
     case Qt::Key_Up:
-        anim = new QPropertyAnimation(ui->scrollArea->verticalScrollBar(), "value");
-        anim->setEndValue(ui->scrollArea->verticalScrollBar()->value() - this->vscroll);
+        setAnimation(&vertical, -this->hscroll);
         break;
     case Qt::Key_Down:
-        anim = new QPropertyAnimation(ui->scrollArea->verticalScrollBar(), "value");
-        anim->setEndValue(ui->scrollArea->verticalScrollBar()->value() + this->vscroll);
+        setAnimation(&vertical, +this->hscroll);
         break;
     case Qt::Key_F5:
         this->showFullScreen();
@@ -161,6 +193,4 @@ void MangaViewer::keyPressEvent(QKeyEvent * event)
     default:
         event->ignore();
     }
-    if(anim)
-        anim->start(QAbstractAnimation::DeleteWhenStopped);
 }

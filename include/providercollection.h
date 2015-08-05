@@ -15,6 +15,7 @@ class ProviderCollection : public QObject
     QPointer<QPluginLoader> last;
 public:
     explicit ProviderCollection(QObject *parent = 0);
+    ~ProviderCollection();
     QStringList getPluginList();
     ImageProvider * getPlugin(const QString & name);
 
